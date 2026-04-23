@@ -1,0 +1,234 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --black: #000000;
+  --white: #ffffff;
+  --transparent: transparent;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --indigo-300: #a5b4fc;
+  --violet-200: #ddd6fe;
+}
+
+/* Класс для кнопок и панелей "Стекло с шумом" */
+.noise-glass {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 10;
+}
+
+/* Генерация легкого визуального шума поверх стекла */
+.noise-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.2;
+  z-index: -1;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Темная тема для стекла */
+.dark .noise-glass {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Класс для кнопок и панелей "Стекло с шумом" */
+.noise-glass {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 10;
+}
+
+/* Генерация легкого визуального шума поверх стекла */
+.noise-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.2;
+  z-index: -1;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Темная тема для стекла */
+html.dark .noise-glass {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body {
+  background-color: #f5f5f7;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+}
+
+.card {
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  width: 320px;
+  text-align: center;
+}
+
+h2 {
+  margin-top: 0;
+  color: #1d1d1f;
+  font-weight: 600;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #d2d2d7;
+  border-radius: 10px;
+  box-sizing: border-box;
+  font-size: 16px;
+  transition: border-color 0.2s;
+}
+
+input:focus {
+  outline: none;
+  border-color: #0071e3;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: #0071e3;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #005bb5;
+}
+
+.toggle-text {
+  margin-top: 20px;
+  color: #0071e3;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.message {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #ff3b30;
+}
+/* Добавьте это к существующему CSS из предыдущего шага */
+.center-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.navbar {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 15px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 10px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+}
+
+.nav-logo {
+  font-size: 20px;
+  font-weight: bold;
+  color: #1d1d1f;
+}
+
+.nav-links span {
+  margin-left: 20px;
+  cursor: pointer;
+  color: #515154;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.nav-links span:hover { color: #0071e3; }
+.logout-btn { color: #ff3b30 !important; }
+
+.content {
+  padding: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.profile-card {
+  width: 400px;
+  text-align: left;
+}
+
+.profile-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+  border: 2px solid #e5e5ea;
+}
+
+.email-text {
+  color: #86868b;
+  margin-top: -10px;
+}
+
+.profile-details label {
+  font-size: 14px;
+  color: #86868b;
+  font-weight: 500;
+  display: block;
+  margin-top: 15px;
+}
+
+.profile-details p {
+  margin: 5px 0 15px 0;
+  font-size: 16px;
+  color: #1d1d1f;
+}
