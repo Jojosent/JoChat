@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { MessageCircle, UserRoundPlus } from 'lucide-react';
+import { MessageCircle, UserRoundPlus, CheckCircle } from 'lucide-react';
 
 export default function PublicProfilePage() {
-    const { username } = useParams(); // Логин из URL
+    const { username } = useParams();
     const currentUser = localStorage.getItem('currentUser');
     const [profile, setProfile] = useState(null);
     const [requestSent, setRequestSent] = useState(false);
@@ -15,7 +15,6 @@ export default function PublicProfilePage() {
             .catch(err => console.error(err));
     }, [username, currentUser]);
 
-    // Логика запроса в друзья (Add Friend)
     const handleSendRequest = async () => {
         try {
             const response = await fetch(`http://localhost:8080/api/user/friends/request/${username}?currentUser=${currentUser}`, {
@@ -23,52 +22,56 @@ export default function PublicProfilePage() {
             });
             if (response.ok) {
                 setRequestSent(true);
-                alert("Запрос в друзья отправлен!");
             }
         } catch (error) {
-            console.error("Ошибка при отправке запроса", error);
+            console.error("Error sending request", error);
         }
     };
 
-    if (!profile) return <div className="text-center p-10">Загрузка...</div>;
+    if (!profile) return <div className="loading-container">Loading...</div>;
 
     return (
-        <div className="flex flex-col items-center text-center max-w-md mx-auto p-4">
-            {/* Аватар */}
-            <img
-                src={profile.avatarUrl || 'https://via.placeholder.com/120'}
-                alt={profile.username}
-                className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg mb-4"
-            />
-            
-            <h2 className="text-2xl font-bold mb-6">@{profile.username}</h2>
+        <div className="public-profile">
+            <div className="public-profile-card">
+                <img
+                    src={profile.avatarUrl || 'https://via.placeholder.com/140'}
+                    alt={profile.username}
+                    className="public-profile-avatar"
+                />
+                
+                <h2 className="public-profile-name">@{profile.username}</h2>
 
-            {/* Основные действия */}
-            <div className="grid grid-cols-2 gap-3 w-full mb-3">
+                <div className="public-profile-actions">
+                    <div className="public-profile-btn-row">
+                        <button
+                            onClick={() => alert("Messaging feature coming soon!")}
+                            className="btn-glass"
+                        >
+                            <MessageCircle size={20} />
+                            Message
+                        </button>
+                    </div>
 
-                {/* Кнопка Сообщения */}
-                <button
-                    onClick={() => alert("Функция сообщений будет добавлена позже!")}
-                    className="noise-glass py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:scale-[1.02] border border-white/10"
-                >
-                    <MessageCircle size={20} />
-                    Сообщение
-                </button>
+                    <button
+                        onClick={handleSendRequest}
+                        disabled={requestSent}
+                        className={requestSent ? 'btn btn-secondary btn-block' : 'btn btn-primary btn-block'}
+                        style={{ marginTop: '4px' }}
+                    >
+                        {requestSent ? (
+                            <>
+                                <CheckCircle size={20} />
+                                Request Sent
+                            </>
+                        ) : (
+                            <>
+                                <UserRoundPlus size={20} />
+                                Add Friend
+                            </>
+                        )}
+                    </button>
+                </div>
             </div>
-
-            {/* Кнопка Добавления в друзья (на всю ширину) */}
-            <button
-                onClick={handleSendRequest}
-                disabled={requestSent}
-                className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
-                    requestSent 
-                    ? 'bg-green-100 text-green-700 cursor-default' 
-                    : 'bg-indigo-500 text-white hover:bg-indigo-600 shadow-lg'
-                }`}
-            >
-                <UserRoundPlus size={20} />
-                {requestSent ? 'Запрос отправлен' : 'Добавить в друзья'}
-            </button>
         </div>
     );
 }

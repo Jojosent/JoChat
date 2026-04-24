@@ -10,7 +10,6 @@ export default function SearchPage() {
 
     useEffect(() => {
         if (query.trim().length === 0) {
-            // setResults([]);
             return;
         }
 
@@ -18,45 +17,44 @@ export default function SearchPage() {
             fetch(`http://localhost:8080/api/user/search?q=${query}`)
                 .then(res => res.json())
                 .then(data => {
-                    // Исключаем самого себя из результатов
                     setResults(data.filter(u => u.username !== currentUser));
                 })
                 .catch(err => console.error(err));
-        }, 300); // Небольшая задержка, чтобы не спамить запросами при вводе
+        }, 300);
 
         return () => clearTimeout(timer);
     }, [query, currentUser]);
 
     return (
-        <div className="w-full">
-            <div className="relative mb-6">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+        <div className="search-container">
+            <div className="search-input-wrap">
+                <Search className="search-icon" size={22} />
                 <input
                     type="text"
-                    placeholder="Найти пользователей..."
-                    className="w-full bg-white/20 dark:bg-black/20 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-2xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-blue-500 transition-all dark:text-white"
+                    placeholder="Search users..."
+                    className="search-input"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                 />
             </div>
 
-            <div className="flex flex-col gap-3">
+            <div className="search-results">
                 {results.map(user => (
                     <div
                         key={user.id}
                         onClick={() => navigate(`/main/user/${user.username}`)}
-                        className="noise-glass p-4 rounded-xl flex items-center gap-4 cursor-pointer hover:scale-[1.02] transition-transform"
+                        className="search-result-item"
                     >
                         <img
-                            src={user.avatarUrl || 'https://via.placeholder.com/50'}
+                            src={user.avatarUrl || 'https://via.placeholder.com/56'}
                             alt={user.username}
-                            className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                            className="search-result-avatar"
                         />
-                        <span className="font-semibold text-lg">{user.username}</span>
+                        <span className="search-result-name">{user.username}</span>
                     </div>
                 ))}
                 {query && results.length === 0 && (
-                    <p className="text-center text-gray-500 mt-4">Ничего не найдено</p>
+                    <p className="search-empty">No users found</p>
                 )}
             </div>
         </div>

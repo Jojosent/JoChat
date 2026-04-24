@@ -23,7 +23,6 @@ export default function ProfilePage() {
     const [isSaving, setIsSaving] = useState(false);
     const currentUser = localStorage.getItem('currentUser');
 
-    // Load profile data on mount
     useEffect(() => {
         if (!currentUser) return;
         fetch(`http://localhost:8080/api/user/${currentUser}`)
@@ -32,7 +31,7 @@ export default function ProfilePage() {
                 setUserData(data);
                 setDraft(data);
             })
-            .catch((err) => console.error('Ошибка загрузки профиля:', err));
+            .catch((err) => console.error('Error loading profile:', err));
     }, [currentUser]);
 
     const handleEdit = () => {
@@ -45,7 +44,6 @@ export default function ProfilePage() {
         setIsEditing(false);
     };
 
-    // Save text fields
     const handleSave = async () => {
         if (isSaving) return;
         setIsSaving(true);
@@ -62,10 +60,10 @@ export default function ProfilePage() {
             if (response.ok) {
                 setUserData(draft);
                 setIsEditing(false);
-                alert('Данные профиля успешно сохранены!');
+                alert('Profile saved successfully!');
             } else {
                 const text = await response.text();
-                let message = `Ошибка ${response.status}`;
+                let message = `Error ${response.status}`;
                 try {
                     const data = JSON.parse(text);
                     message = data.message || message;
@@ -75,14 +73,13 @@ export default function ProfilePage() {
                 alert(message);
             }
         } catch (error) {
-            console.error('Ошибка сети:', error);
-            alert('Ошибка соединения с сервером');
+            console.error('Network error:', error);
+            alert('Connection error');
         } finally {
             setIsSaving(false);
         }
     };
 
-    // Avatar upload
     const handleAvatarUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -104,20 +101,20 @@ export default function ProfilePage() {
                 const updated = { ...userData, avatarUrl: data.avatarUrl };
                 setUserData(updated);
                 setDraft((prev) => ({ ...prev, avatarUrl: data.avatarUrl }));
-                alert('Фото профиля успешно обновлено!');
+                alert('Profile photo updated!');
             } else {
-                alert('Ошибка при загрузке фото');
+                alert('Error uploading photo');
             }
         } catch (error) {
-            console.error('Ошибка загрузки фото:', error);
-            alert('Ошибка соединения с сервером при отправке файла');
+            console.error('Upload error:', error);
+            alert('Connection error');
         }
     };
 
     const avatarFallback =
         'data:image/svg+xml;utf8,' +
         encodeURIComponent(
-            `<svg xmlns="http://www.w3.org/2000/svg" width="112" height="112" viewBox="0 0 112 112"><rect width="112" height="112" fill="%23eef2ff"/><circle cx="56" cy="44" r="20" fill="%234f46e5"/><path d="M20 104c0-19.882 16.118-36 36-36s36 16.118 36 36" fill="%234f46e5"/></svg>`
+            `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><rect width="120" height="120" fill="%2327272a"/><circle cx="60" cy="48" r="22" fill="%23a78bfa"/><path d="M20 112c0-22.09 17.91-40 40-40s40 17.91 40 40" fill="%23a78bfa"/></svg>`
         );
 
     const formatDate = (iso) => {
@@ -125,7 +122,7 @@ export default function ProfilePage() {
         try {
             const d = new Date(iso);
             if (Number.isNaN(d.getTime())) return iso;
-            return d.toLocaleDateString('ru-RU', {
+            return d.toLocaleDateString('en-US', {
                 day: '2-digit',
                 month: 'long',
                 year: 'numeric',
@@ -144,13 +141,13 @@ export default function ProfilePage() {
                     <div className="avatar-wrap">
                         <img
                             src={userData.avatarUrl || avatarFallback}
-                            alt={userData.username ? `Аватар ${userData.username}` : 'Аватар'}
+                            alt={userData.username ? `${userData.username}'s avatar` : 'Avatar'}
                             className="avatar"
                         />
                         <label
                             className="avatar-upload-btn"
-                            title="Загрузить новое фото"
-                            aria-label="Загрузить новое фото"
+                            title="Upload new photo"
+                            aria-label="Upload new photo"
                         >
                             <Camera size={16} strokeWidth={2.25} />
                             <input
@@ -163,11 +160,11 @@ export default function ProfilePage() {
 
                     <div className="profile-identity">
                         <h1 className="profile-name">
-                            {userData.username || 'Без имени'}
+                            {userData.username || 'No name'}
                         </h1>
                         <p className="profile-email">
                             <Mail size={14} />
-                            <span>{userData.email || 'email не указан'}</span>
+                            <span>{userData.email || 'Email not set'}</span>
                         </p>
                     </div>
 
@@ -179,7 +176,7 @@ export default function ProfilePage() {
                                 onClick={handleEdit}
                             >
                                 <Pencil size={16} />
-                                Редактировать
+                                Edit Profile
                             </button>
                         ) : (
                             <>
@@ -190,7 +187,7 @@ export default function ProfilePage() {
                                     disabled={isSaving}
                                 >
                                     <X size={16} />
-                                    Отмена
+                                    Cancel
                                 </button>
                                 <button
                                     type="button"
@@ -199,7 +196,7 @@ export default function ProfilePage() {
                                     disabled={isSaving}
                                 >
                                     <Save size={16} />
-                                    {isSaving ? 'Сохранение…' : 'Сохранить'}
+                                    {isSaving ? 'Saving...' : 'Save'}
                                 </button>
                             </>
                         )}
@@ -211,9 +208,9 @@ export default function ProfilePage() {
             <section className="profile-section">
                 <header className="profile-section-header">
                     <div>
-                        <h2 className="profile-section-title">Личная информация</h2>
+                        <h2 className="profile-section-title">Personal Information</h2>
                         <p className="profile-section-subtitle">
-                            Обновите контактные данные и дату рождения
+                            Update your contact details and birthday
                         </p>
                     </div>
                 </header>
@@ -222,7 +219,7 @@ export default function ProfilePage() {
                     <div className="profile-row">
                         <div className="profile-row-label">
                             <UserCircle2 size={16} />
-                            Логин
+                            Username
                         </div>
                         <div className="profile-row-value">
                             {userData.username || '—'}
@@ -242,14 +239,14 @@ export default function ProfilePage() {
                     <div className="profile-row">
                         <div className="profile-row-label">
                             <Phone size={16} />
-                            Телефон
+                            Phone
                         </div>
                         <div className="profile-row-value profile-row-control">
                             {isEditing ? (
                                 <input
                                     className="input input-no-icon"
                                     type="tel"
-                                    placeholder="+7 000 000 00 00"
+                                    placeholder="+1 000 000 0000"
                                     value={draft.phoneNumber || ''}
                                     onChange={(e) =>
                                         setDraft({ ...draft, phoneNumber: e.target.value })
@@ -258,7 +255,7 @@ export default function ProfilePage() {
                             ) : userData.phoneNumber ? (
                                 <span>{userData.phoneNumber}</span>
                             ) : (
-                                <span className="is-empty">Не указан</span>
+                                <span className="is-empty">Not specified</span>
                             )}
                         </div>
                     </div>
@@ -266,7 +263,7 @@ export default function ProfilePage() {
                     <div className="profile-row">
                         <div className="profile-row-label">
                             <Calendar size={16} />
-                            Дата рождения
+                            Birthday
                         </div>
                         <div className="profile-row-value profile-row-control">
                             {isEditing ? (
@@ -281,7 +278,7 @@ export default function ProfilePage() {
                             ) : userData.birthDate ? (
                                 <span>{formatDate(userData.birthDate)}</span>
                             ) : (
-                                <span className="is-empty">Не указана</span>
+                                <span className="is-empty">Not specified</span>
                             )}
                         </div>
                     </div>
@@ -295,7 +292,7 @@ export default function ProfilePage() {
                             onClick={handleCancel}
                             disabled={isSaving}
                         >
-                            Отмена
+                            Cancel
                         </button>
                         <button
                             type="button"
@@ -304,7 +301,7 @@ export default function ProfilePage() {
                             disabled={isSaving}
                         >
                             <Save size={16} />
-                            {isSaving ? 'Сохранение…' : 'Сохранить изменения'}
+                            {isSaving ? 'Saving...' : 'Save Changes'}
                         </button>
                     </div>
                 )}

@@ -29,57 +29,57 @@ export default function NotificationsPage() {
         }
     };
 
-    if (loading) return <div className="text-center py-10 dark:text-white">Загрузка...</div>;
+    if (loading) return <div className="loading-container">Loading...</div>;
 
     return (
-        <div className="max-w-2xl mx-auto">
-            <h1 className="text-2xl font-bold mb-6 dark:text-white flex items-center gap-2">
-                Уведомления
+        <div className="notifications-container">
+            <div className="notifications-header">
+                <h1 className="notifications-title">Notifications</h1>
                 {requests.length > 0 && (
-                    <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                        {requests.length}
-                    </span>
+                    <span className="notifications-badge">{requests.length}</span>
                 )}
-            </h1>
+            </div>
 
-            <div className="space-y-3">
+            <div className="notifications-list">
                 {requests.length === 0 ? (
-                    <div className="bg-white/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-12 text-center">
-                        <BellOff className="mx-auto text-zinc-400 mb-4" size={48} />
-                        <p className="text-zinc-500 dark:text-zinc-400 font-medium">Новых уведомлений нет</p>
+                    <div className="notifications-empty">
+                        <div className="notifications-empty-icon">
+                            <BellOff size={40} />
+                        </div>
+                        <p>No new notifications</p>
                     </div>
                 ) : (
                     requests.map(req => (
-                        <div key={req.requestId} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
-                            <div className="flex items-center gap-4">
-                                <div className="relative">
+                        <div key={req.requestId} className="notification-item">
+                            <div className="notification-user">
+                                <div className="notification-avatar-wrap">
                                     <img
-                                        src={req.senderAvatar || 'https://via.placeholder.com/48'}
-                                        className="w-12 h-12 rounded-full object-cover border border-zinc-100 dark:border-zinc-700"
-                                        alt="avatar"
+                                        src={req.senderAvatar || 'https://via.placeholder.com/56'}
+                                        className="notification-avatar"
+                                        alt={req.senderName}
                                     />
-                                    <div className="absolute -bottom-1 -right-1 bg-blue-500 text-white p-1 rounded-full border-2 border-white dark:border-zinc-900">
-                                        <UserPlus size={10} />
+                                    <div className="notification-avatar-badge">
+                                        <UserPlus size={12} />
                                     </div>
                                 </div>
-                                <div>
-                                    <p className="font-bold dark:text-white">@{req.senderName}</p>
-                                    <p className="text-sm text-zinc-500 dark:text-zinc-400">Хочет добавить вас в друзья</p>
+                                <div className="notification-info">
+                                    <h4>@{req.senderName}</h4>
+                                    <p>Wants to add you as a friend</p>
                                 </div>
                             </div>
 
-                            <div className="flex gap-2">
+                            <div className="notification-actions">
                                 <button
                                     onClick={() => handleRespond(req.requestId, 'accept')}
-                                    className="bg-blue-500 hover:bg-blue-600 text-white p-2.5 rounded-xl transition-colors"
-                                    title="Принять"
+                                    className="notification-btn notification-btn-accept"
+                                    title="Accept"
                                 >
                                     <Check size={20} />
                                 </button>
                                 <button
                                     onClick={() => handleRespond(req.requestId, 'reject')}
-                                    className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-red-500 hover:text-white p-2.5 rounded-xl transition-colors"
-                                    title="Отклонить"
+                                    className="notification-btn notification-btn-reject"
+                                    title="Reject"
                                 >
                                     <X size={20} />
                                 </button>
