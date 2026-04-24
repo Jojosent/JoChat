@@ -10,7 +10,7 @@ export default function SearchPage() {
 
     useEffect(() => {
         if (query.trim().length === 0) {
-            setResults([]);
+            // setResults([]);
             return;
         }
 

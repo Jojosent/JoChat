@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { UserPlus, UserCheck, MessageCircle, UserRoundPlus } from 'lucide-react';
+import { MessageCircle, UserRoundPlus } from 'lucide-react';
 
 export default function PublicProfilePage() {
     const { username } = useParams(); // Логин из URL
