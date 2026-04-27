@@ -33,8 +33,8 @@ public class SecurityConfig {
                 // 2. Наши открытые эндпоинты
                 // .requestMatchers("/api/auth/**", "/api/user/**").permitAll()
                 // Измените эту строку в authorizeHttpRequests:
-                .requestMatchers("/api/auth/**", "/api/user/**", "/uploads/**", "/error", "/api/chat/**").permitAll()
-                // 3. Все остальное закрыто
+                .requestMatchers("/api/auth/**", "/api/user/**", "/uploads/**", "/error", "/api/chat/**", "/api/groups/**").permitAll() // 3. Все остальное закрыто
+                .requestMatchers("/api/auth/**", "/api/user/**", "/uploads/**", "/error", "/api/chat/**", "/api/groups/**").permitAll() // 3. Все остальное закрыто
                 .anyRequest().authenticated()
                 );
         return http.build();

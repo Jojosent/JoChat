@@ -36,7 +36,7 @@ export default function MainLayout() {
         { label: 'Messages', ariaLabel: 'Go to chat', link: '/main/chat' },
         { label: 'Search', ariaLabel: 'Search users', link: '/main/search' },
         { 
-            label: `Notifications${pendingRequests.length > 0 ? ` (${pendingRequests.length})` : ''}`, 
+            label: `notices${pendingRequests.length > 0 ? ` (${pendingRequests.length})` : ''}`, 
             ariaLabel: 'View notifications', 
             link: '/main/notifications' 
         },

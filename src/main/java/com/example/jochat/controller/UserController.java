@@ -108,12 +108,57 @@ public class UserController {
     }
 
     // ----------------------------------------------------------------------------------------------------
+    // 1. ОБНОВЛЕННЫЙ МЕТОД ПОИСКА (Теперь возвращает статус дружбы)
     @GetMapping("/search")
-    public ResponseEntity<?> searchUsers(@RequestParam String q) {
+    public ResponseEntity<?> searchUsers(@RequestParam String q, @RequestParam String currentUser) {
+        Optional<User> currentOpt = userRepository.findByUsername(currentUser);
+        if (currentOpt.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        User current = currentOpt.get();
+
         List<User> users = userRepository.findByUsernameContainingIgnoreCase(q);
-        // Очищаем пароли перед отправкой списка
-        users.forEach(u -> u.setPassword(null));
-        return ResponseEntity.ok(users);
+
+        List<Map<String, Object>> result = users.stream()
+                .filter(u -> !u.getId().equals(current.getId())) // Исключаем самого себя
+                .map(u -> {
+                    String status = "NONE";
+
+                    // Ищем заявку в обе стороны
+                    Optional<FriendRequest> req1 = friendRequestRepository.findBySenderAndReceiver(current, u);
+                    Optional<FriendRequest> req2 = friendRequestRepository.findBySenderAndReceiver(u, current);
+
+                    if (req1.isPresent()) {
+                        status = req1.get().getStatus().name(); // PENDING, ACCEPTED или REJECTED
+                    } else if (req2.isPresent()) {
+                        status = req2.get().getStatus().name();
+                    }
+
+                    return Map.<String, Object>of(
+                            "id", u.getId(),
+                            "username", u.getUsername(),
+                            "avatarUrl", u.getAvatarUrl() != null ? u.getAvatarUrl() : "",
+                            "friendStatus", status // Передаем статус на фронтенд!
+                    );
+                }).toList();
+
+        return ResponseEntity.ok(result);
+    }
+
+    // 2. НОВЫЙ МЕТОД ДЛЯ УДАЛЕНИЯ ИЗ ДРУЗЕЙ
+    @PostMapping("/friends/remove/{targetUsername}")
+    public ResponseEntity<?> removeFriend(@PathVariable String targetUsername, @RequestParam String currentUser) {
+        User current = userRepository.findByUsername(currentUser).get();
+        User target = userRepository.findByUsername(targetUsername).get();
+
+        // Ищем и удаляем связь в базе данных
+        Optional<FriendRequest> req1 = friendRequestRepository.findBySenderAndReceiver(current, target);
+        Optional<FriendRequest> req2 = friendRequestRepository.findBySenderAndReceiver(target, current);
+
+        req1.ifPresent(friendRequestRepository::delete);
+        req2.ifPresent(friendRequestRepository::delete);
+
+        return ResponseEntity.ok(Map.of("message", "Пользователь удален из друзей"));
     }
 
     // 2. Получить профиль с инфой о подписках
@@ -126,20 +171,34 @@ public class UserController {
             User targetUser = targetOpt.get();
             User current = currentOpt.get();
 
-            boolean isFollowing = targetUser.getFollowers().contains(current);
+            String status = "NONE";
 
-            // Собираем безопасный ответ
+            // СТРОГАЯ ПРОВЕРКА В ОБЕ СТОРОНЫ:
+            // req1: Я отправил ему заявку?
+            Optional<FriendRequest> req1 = friendRequestRepository.findBySenderAndReceiver(current, targetUser);
+            // req2: Он отправил мне заявку?
+            Optional<FriendRequest> req2 = friendRequestRepository.findBySenderAndReceiver(targetUser, current);
+
+            if (req1.isPresent()) {
+                status = req1.get().getStatus().name();
+            } else if (req2.isPresent()) {
+                status = req2.get().getStatus().name();
+            }
+
+            int friendsCount = friendRequestRepository.findAcceptedFriends(targetUser).size();
+
             return ResponseEntity.ok(Map.of(
                     "username", targetUser.getUsername(),
                     "avatarUrl", targetUser.getAvatarUrl() != null ? targetUser.getAvatarUrl() : "",
-                    "followersCount", targetUser.getFollowers().size(),
-                    "followingCount", targetUser.getFollowing().size(),
-                    "isFollowing", isFollowing
+                    "friendsCount", friendsCount,
+                    "friendStatus", status // Теперь статус всегда будет правильным!
             ));
         }
         return ResponseEntity.notFound().build();
     }
 
+
+    
     // 3. Подписаться / Отписаться
     @PostMapping("/{targetUsername}/toggle-follow")
     public ResponseEntity<?> toggleFollow(@PathVariable String targetUsername, @RequestParam String currentUser) {
@@ -178,22 +237,32 @@ public class UserController {
     private FriendRequestRepository friendRequestRepository;
 
     // 1. Отправить запрос в друзья
+// МЕТОД ОТПРАВКИ ЗАЯВКИ В ДРУЗЬЯ (С ЗАЩИТОЙ ОТ ДУБЛИКАТОВ)
     @PostMapping("/friends/request/{targetUsername}")
     public ResponseEntity<?> sendFriendRequest(@PathVariable String targetUsername, @RequestParam String currentUser) {
         User sender = userRepository.findByUsername(currentUser).get();
-        User receiver = userRepository.findByUsername(targetUsername).get();
+        User target = userRepository.findByUsername(targetUsername).get();
 
-        if (friendRequestRepository.findBySenderAndReceiver(sender, receiver).isPresent()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Запрос уже отправлен"));
+        // 1. СТРОГАЯ ПРОВЕРКА: Ищем связь в обе стороны
+        Optional<FriendRequest> req1 = friendRequestRepository.findBySenderAndReceiver(sender, target);
+        Optional<FriendRequest> req2 = friendRequestRepository.findBySenderAndReceiver(target, sender);
+
+        // Если заявка или дружба уже существует (от А к Б или от Б к А) — блокируем!
+        if (req1.isPresent() || req2.isPresent()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Связь между пользователями уже существует"));
         }
 
+        // 2. Если связей нет, создаем новую заявку
         FriendRequest request = new FriendRequest();
         request.setSender(sender);
-        request.setReceiver(receiver);
-        request.setStatus(RequestStatus.PENDING);
+        request.setReceiver(target);
+
+        // ВНИМАНИЕ: Убедитесь, что ваш статус называется именно так (RequestStatus.PENDING)
+        request.setStatus(com.example.jochat.entity.RequestStatus.PENDING);
+
         friendRequestRepository.save(request);
 
-        return ResponseEntity.ok(Map.of("message", "Запрос отправлен"));
+        return ResponseEntity.ok(Map.of("message", "Заявка успешно отправлена"));
     }
 
     // 2. Показать все входящие заявки (для колокольчика/уведомлений)
@@ -211,16 +280,23 @@ public class UserController {
     }
 
     // 3. Принять или отклонить запрос
-    @PostMapping("/friends/respond/{requestId}")
-    public ResponseEntity<?> respondToRequest(@PathVariable Long requestId, @RequestParam String action) {
-        FriendRequest request = friendRequestRepository.findById(requestId).get();
-        if ("accept".equals(action)) {
-            request.setStatus(RequestStatus.ACCEPTED);
-            // Здесь можно также добавить логику в таблицу друзей, если она есть
-        } else {
-            request.setStatus(RequestStatus.REJECTED);
+@PostMapping("/friends/respond/{id}")
+    public ResponseEntity<?> respondToRequest(@PathVariable Long id, @RequestParam String action) {
+        Optional<FriendRequest> requestOpt = friendRequestRepository.findById(id);
+        
+        if (requestOpt.isPresent()) {
+            FriendRequest request = requestOpt.get();
+            
+            if ("accept".equals(action)) {
+                // Если нажали "Принять" — меняем статус на ACCEPTED и СОХРАНЯЕМ в базу
+                request.setStatus(com.example.jochat.entity.RequestStatus.ACCEPTED);
+                friendRequestRepository.save(request);
+            } else if ("reject".equals(action)) {
+                // Если отклонили — просто удаляем заявку, чтобы можно было отправить снова
+                friendRequestRepository.delete(request);
+            }
+            return ResponseEntity.ok(Map.of("message", "Статус успешно обновлен"));
         }
-        friendRequestRepository.save(request);
-        return ResponseEntity.ok(Map.of("message", "Успешно"));
+        return ResponseEntity.badRequest().body(Map.of("error", "Заявка не найдена"));
     }
 }

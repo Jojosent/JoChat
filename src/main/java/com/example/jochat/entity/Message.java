@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "messages")
 public class Message {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,29 +23,68 @@ public class Message {
     @JoinColumn(name = "sender_id")
     private User sender;
 
+    // Оставляем для личных сообщений (может быть null)
     @ManyToOne
     @JoinColumn(name = "receiver_id")
     private User receiver;
+
+    // НОВОЕ ПОЛЕ: ссылка на группу (может быть null)
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private ChatGroup group;
 
     @Column(columnDefinition = "TEXT")
     private String content;
 
     private LocalDateTime timestamp = LocalDateTime.now();
 
+    // --- Добавьте новые геттеры и сеттеры к существующим ---
+    public ChatGroup getGroup() {
+        return group;
+    }
+
+    public void setGroup(ChatGroup group) {
+        this.group = group;
+    }
+
     // --- ГЕТТЕРЫ И СЕТТЕРЫ ---
+    public Long getId() {
+        return id;
+    }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public User getSender() { return sender; }
-    public void setSender(User sender) { this.sender = sender; }
+    public User getSender() {
+        return sender;
+    }
 
-    public User getReceiver() { return receiver; }
-    public void setReceiver(User receiver) { this.receiver = receiver; }
+    public void setSender(User sender) {
+        this.sender = sender;
+    }
 
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
+    public User getReceiver() {
+        return receiver;
+    }
 
-    public LocalDateTime getTimestamp() { return timestamp; }
-    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
+    public void setReceiver(User receiver) {
+        this.receiver = receiver;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
 }
